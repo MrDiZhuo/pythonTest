@@ -11,21 +11,6 @@ print(PC_TIME+"----"+PC_WEEK)
 
 '''文本内容'''
 TXT_ARTICLE = open(PC_TIME+"_"+PC_SECOND+".txt", "w+", encoding='utf-8')
-'''记录url（每个报纸不一样）'''
-TXT_URL_themetimes = open("url_themetimes.txt", "a+", encoding='utf-8')
-TXT_URL_skysport = open("url_skysport.txt", "a+", encoding='utf-8')
-TXT_URL_thesun = open("url_thesun.txt", "a+", encoding='utf-8')
-TXT_URL_dailymail = open("url_dailmail.txt", "a+", encoding='utf-8')
-TXT_URL_mirror = open("url_mirror.txt", "a+", encoding='utf-8')
-TXT_URL_independent = open("url_independent.txt", "a+", encoding='utf-8')
-TXT_URL_telegraph = open("url_telegraph.txt", "a+", encoding='utf-8')
-TXT_URL_liverpool_manchester = open("url_liverpool_manchester.txt", "a+", encoding='utf-8')
-TXT_URL_standard = open("url_standard.txt", "a+", encoding='utf-8')
-TXT_URL_reuters = open("url_reuters.txt", "a+", encoding='utf-8')
-TXT_URL_worldsoccertalk = open("url_worldsoccertalk.txt", "a+", encoding='utf-8')
-TXT_URL_bbc = open("url_bbc.txt", "a+", encoding='utf-8')
-TXT_URL_football365 = open("url_football365.txt", "a+", encoding='utf-8')
-TXT_URL_guardian = open("url_guardian.txt", "a+", encoding='utf-8')
 '''文件夹图片'''
 PACKAGE_PHOTO = PC_TIME+"_photo"
 
@@ -77,7 +62,8 @@ headers = {
 
 
 '''url的md5加密和查重复'''
-def md5(url,filename,file):
+def md5(url,filename):
+    file = open(filename, "a+", encoding='utf-8')
     m = hashlib.md5()
     m.update(url.encode('utf-8'))
     url_md5 = m.hexdigest()
@@ -88,6 +74,7 @@ def md5(url,filename,file):
     else:
         file.write(url_md5 + "\n")
         bool = True
+    file.close()
     return bool
 
 '''打开路径'''
@@ -115,9 +102,9 @@ def savePhoto(url,name):
     return
 
 def ThemeTimes(url,flag,s_theme):
-    if(url[:15] == "/edition/sport/"):
+    if(url[:15] == "/edition/sport/" or url[:18] =="/edition/the-game/"):
         url = "https://www.thetimes.co.uk/" + url
-        if (md5(url, "url_themetimes.txt", TXT_URL_themetimes)):
+        if (md5(url, "url_themetimes.txt")):
             TXT_ARTICLE.write(
                 "\n""===============++++++++++++++++" + str(flag) + "++++++++++==============" + "\n" + url + "\n")
             root = getRoot(url,s_theme)
@@ -150,7 +137,7 @@ def ThemeTimes(url,flag,s_theme):
 
 def SkySport(url,flag):
     if(url[34:38] == "news"):
-        if (md5(url, "url_skysport.txt", TXT_URL_skysport)):
+        if (md5(url, "url_skysport.txt")):
             TXT_ARTICLE.write(
                 "\n""===============++++++++++++++++" + str(flag) + "++++++++++==============" + "\n" + url + "\n")
             root = getSimpleRoot(url)
@@ -167,11 +154,11 @@ def SkySport(url,flag):
             TXT_ARTICLE.write("表格：\n")
             table = article.xpath('//div[@class = "article__body article__body--lead"]//div[@class = "widge-table"]')
             for i in range(len(table)):
-                print(table[i].xpath('.//h2/text()')[0])
+                TXT_ARTICLE.write(table[i].xpath('.//h2/text()')[0])
                 for th in table[i].xpath('.//thead//th/text()'):
-                    print("                                                "+th)
+                    TXT_ARTICLE.write("                                                "+th)
                 for tr in table[i].xpath('.//tbody//tr'):
-                    print(tr.xpath('string(.)'))
+                    TXT_ARTICLE.write(tr.xpath('string(.)'))
             i = 0
             for src in article.xpath('//div[@class = "article__body article__body--lead"]//figure[@class = "widge-figure"]//img/@data-src'):
                 savePhoto(src, "skyspot_" + str(flag) + "_" + str(i))
@@ -179,19 +166,17 @@ def SkySport(url,flag):
     return
 
 def TheSun_url(root , flag):
-    for url in root.xpath(
-            '//section[@class = "football football--landing theme-football"]//a[@class = "teaser-anchor"]/@href'):
+    for url in root.xpath('//section[@class = "football football--landing theme-football"]//a[@class = "teaser-anchor"]/@href'):
         flag = flag + 1
         TheSun(url, flag)
-    for url in root.xpath(
-            '//section[@class = "football football--landing theme-football"]//a[@class = "rail__item-anchor"]/@href'):
+    for url in root.xpath( '//section[@class = "football football--landing theme-football"]//a[@class = "rail__item-anchor"]/@href'):
         flag = flag + 1
         TheSun(url, flag)
     return
 
 def TheSun(url,flag):
     if(url[25:30] == "sport"):
-        if(md5(url,"url_thesun.txt",TXT_URL_thesun)):
+        if(md5(url,"url_thesun.txt")):
             TXT_ARTICLE.write(
                 "\n""===============++++++++++++++++" + str(flag) + "++++++++++==============" + "\n" + url + "\n")
             root = getSimpleRoot(url)
@@ -213,7 +198,7 @@ def TheSun(url,flag):
 
 def DailMail(url,flag):
     url = "http://www.dailymail.co.uk"+url
-    if(md5(url,"url_dailmail.txt",TXT_URL_dailymail)):
+    if(md5(url,"url_dailmail.txt")):
         TXT_ARTICLE.write(
             "\n""===============++++++++++++++++" + str(flag) + "++++++++++==============" + "\n" + url + "\n")
         root = getSimpleRoot(url)
@@ -239,7 +224,7 @@ def DailMail(url,flag):
 
 def Mirror(url,flag):
     if(url[24:29] == "sport"):
-        if(md5(url,"url_mirror.txt",TXT_URL_mirror)):
+        if(md5(url,"url_mirror.txt")):
             TXT_ARTICLE.write(
                 "\n""===============++++++++++++++++" + str(flag) + "++++++++++==============" + "\n" + url + "\n")
             root = getSimpleRoot(url)
@@ -260,7 +245,7 @@ def Mirror(url,flag):
 def independent(url , flag):
     if(url[:4] !="http"):
         url = "http://www.independent.co.uk/" + url
-        if(md5(url,"url_independent.txt",TXT_URL_independent)):
+        if(md5(url,"url_independent.txt")):
             TXT_ARTICLE.write(
                 "\n""===============++++++++++++++++" + str(flag) + "++++++++++==============" + "\n" + url + "\n")
             root = getSimpleRoot(url)
@@ -295,7 +280,7 @@ def Telegraph_url(root,flag):
     return
 def Telegraph(url , flag):
     url = "http://www.telegraph.co.uk"+url
-    if(md5(url,"url_telegraph.txt",TXT_URL_telegraph)):
+    if(md5(url,"url_telegraph.txt")):
         TXT_ARTICLE.write(
             "\n""===============++++++++++++++++" + str(flag) + "++++++++++==============" + "\n" + url + "\n")
         root = getSimpleRoot(url)
@@ -321,7 +306,7 @@ def Telegraph(url , flag):
             i = i + 1
     return
 def Liverpool_Manchester(url,flag,name):
-    if(md5(url,"url_liverpool_manchester.txt",TXT_URL_liverpool_manchester)):
+    if(md5(url,"url_liverpool_manchester.txt")):
         TXT_ARTICLE.write(
             "\n""===============++++++++++++++++" + str(flag) + "++++++++++==============" + "\n" + url + "\n")
         root = getSimpleRoot(url)
@@ -347,7 +332,7 @@ def Liverpool_Manchester(url,flag,name):
     return
 def standard(url,flag):
     url = "https://www.standard.co.uk"+url
-    if(md5(url,"url_standard.txt",TXT_URL_standard)):
+    if(md5(url,"url_standard.txt")):
         TXT_ARTICLE.write(
             "\n""===============++++++++++++++++" + str(flag) + "++++++++++==============" + "\n" + url + "\n")
         root = getSimpleRoot(url)
@@ -372,7 +357,7 @@ def standard(url,flag):
     return
 
 def WorldSoccertalk(url,flag):
-    if(md5(url,"url_worldsoccertalk.txt",TXT_URL_worldsoccertalk)):
+    if(md5(url,"url_worldsoccertalk.txt")):
         TXT_ARTICLE.write(
             "\n""===============++++++++++++++++" + str(flag) + "++++++++++==============" + "\n" + url + "\n")
         root = getSimpleRoot(url)
@@ -386,7 +371,7 @@ def WorldSoccertalk(url,flag):
     return
 
 def Bbc(url,flag):
-    if(md5(url,"url_bbc.txt",TXT_URL_bbc)):
+    if(md5(url,"url_bbc.txt")):
         TXT_ARTICLE.write(
             "\n""===============++++++++++++++++" + str(flag) + "++++++++++==============" + "\n" + url + "\n")
         root = getSimpleRoot(url)
@@ -421,7 +406,7 @@ def footbal365_getUrl_2(root,flag):
         footbal365(url, flag)
     return
 def footbal365(url,flag):
-    if(url[7:31] == "www.football365.com/news" and md5(url,"url_football365.txt" , TXT_URL_football365)):
+    if(url[7:31] == "www.football365.com/news" and md5(url,"url_football365.txt")):
         TXT_ARTICLE.write(
             "\n""===============++++++++++++++++" + str(flag) + "++++++++++==============" + "\n" + url + "\n")
         root = getSimpleRoot(url)
@@ -439,7 +424,7 @@ def footbal365(url,flag):
     return
 
 def guardian(url,flag):
-    if(md5(url,"url_guardian.txt",TXT_URL_guardian)):
+    if(url[-5:]!="-live" and url[-5:]!="video" and md5(url,"url_guardian.txt")):
         TXT_ARTICLE.write(
             "\n""===============++++++++++++++++" + str(flag) + "++++++++++==============" + "\n" + url + "\n")
         root = getSimpleRoot(url)
@@ -472,9 +457,7 @@ def guardian(url,flag):
             for aside in article[0].xpath(
                     './/div[@class = "content__article-body from-content-api js-article__body"]/aside//p[@class = "pullquote-paragraph"]/text()'):
                 TXT_ARTICLE.write(aside + "\n")
-
     return
-
 
 TXT_ARTICLE.write("--------------------------------------------泰晤士报----------------------------------------"+"\n")
 flag = 0
@@ -484,12 +467,10 @@ root = getRoot(URL_themetimes,s_theme)
 for url_sport in root.xpath('//section[@id = "section-sport"]//h3/a/@href'):
     flag = flag + 1
     ThemeTimes(url_sport,flag,s_theme)
-if(PC_WEEK == 1):
+if(PC_WEEK == "1"):
     for url_game in root.xpath('//section[@id = "section-theGame"]//h3/a/@href'):
         flag = flag + 1
         ThemeTimes(url_game, flag,s_theme)
-TXT_URL_themetimes.close()
-
 
 TXT_ARTICLE.write("--------------------------------------------天空体育----------------------------------------"+"\n")
 flag = 0
@@ -501,7 +482,6 @@ root = getSimpleRoot(URL_skysports_pundits)
 for url_pundits in root.xpath('//div[@class = "news-list block "]//div[@class = "news-list__item news-list__item--show-thumb-bp30"]//h4[@class = "news-list__headline"]/a/@href')[0:20]:
     flag = flag +1
     SkySport(url_pundits,flag)
-TXT_URL_skysport.close()
 
 TXT_ARTICLE.write("--------------------------------------------卫报----------------------------------------"+"\n")
 flag = 0
@@ -524,11 +504,10 @@ root = getSimpleRoot(URL_theSun_premierleague02)
 TheSun_url(root,flag)
 root = getSimpleRoot(URL_theSun_premierleague03)
 TheSun_url(root,flag)
-TXT_URL_thesun.close()
+
 
 TXT_ARTICLE.write("--------------------------------------------邮报----------------------------------------"+"\n")
 flag = 0
-
 root = getSimpleRoot(URL_dailymail)
 for url in root.xpath('//h2[@class = "linkro-darkred"]//a/@href'):
     flag = flag+1
@@ -539,7 +518,6 @@ for url in root.xpath('//div[@class = "puff cleared"]//ul[@class ="link-bogr2 li
 for url in root.xpath('//div[@id = "automated-articles"]//div[@class = "article article-card"]//h2[@class="headline linkro-darkred"]/a/@href'):
     flag = flag +1
     DailMail(url, flag)
-TXT_URL_dailymail.close()
 
 TXT_ARTICLE.write("--------------------------------------------镜报----------------------------------------"+"\n")
 flag = 0
@@ -550,7 +528,6 @@ for url in root.xpath('//main[@class = "mod-pancakes"]//strong/a/@href'):
 for url in root.xpath('//main[@class = "mod-pancakes"]//h2/a/@href'):
     flag = flag+1
     Mirror(url, flag)
-TXT_URL_mirror.close()
 
 TXT_ARTICLE.write("--------------------------------------------独立报----------------------------------------"+"\n")
 flag = 0
@@ -573,7 +550,6 @@ root = getSimpleRoot(URL_telegraph_football)
 Telegraph_url(root,flag)
 root = getSimpleRoot(URL_telegraph_premier)
 Telegraph_url(root,flag)
-TXT_URL_telegraph.close()
 
 TXT_ARTICLE.write("--------------------------------------------回声报----------------------------------------"+"\n")
 flag = 0
@@ -592,7 +568,6 @@ root = getSimpleRoot(URL_manchester_city)
 for url in root.xpath('//main//div[@class = "inner"]//strong/a/@href'):
     flag = flag+1
     Liverpool_Manchester(url,flag,"manchester")
-TXT_URL_liverpool_manchester.close()
 
 TXT_ARTICLE.write("--------------------------------------------旗帜晚报----------------------------------------"+"\n")
 flag = 0
@@ -609,7 +584,6 @@ try:
             '//section[@class = "section-content"]//div[@class = "article"]/div[@class = "text"]/a/@href'):
         flag = flag + 1
         standard(url, flag)
-    TXT_URL_standard.close()
 except Exception:
     pass
 
@@ -637,7 +611,6 @@ root = getSimpleRoot(URL_worldsoccertalk_3)
 for url in root.xpath('//div[@id = "content_box"]//article/header/h2/a/@href'):
     flag = flag+1
     WorldSoccertalk(url,flag)
-TXT_URL_worldsoccertalk.close()
 
 TXT_ARTICLE.write("--------------------------------------------bbc----------------------------------------"+"\n")
 flag = 0
@@ -648,7 +621,6 @@ try:
         if (len(url) > 15 and url[7:11] != "live" and len(url) < 26):
             flag = flag + 1
             Bbc("http://www.bbc.com" + url, flag)
-    TXT_URL_bbc.close()
 except Exception:
     pass
 
@@ -656,7 +628,6 @@ TXT_ARTICLE.write("--------------------------------------------足球365--------
 flag = 0
 root = getSimpleRoot(URL_football365)
 footbal365_getUrl_1(root,flag)
-TXT_URL_football365.close()
 
 TXT_ARTICLE.write("--------------------------------------------独立报----------------------------------------"+"\n")
 flag = 0
@@ -672,6 +643,5 @@ root = getSimpleRoot(URL_independent_international)
 for url in root.xpath('//div[@id = "content"]//div[@class = "content"]/div[@class = "row"]//article//div[@class = "content"]//h1/a/@href'):
     flag = flag +1
     independent(url,flag)
-TXT_URL_independent.close()
 
 TXT_ARTICLE.close()
